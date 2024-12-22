@@ -12,8 +12,6 @@ const blogValidationSchema = z.object({
     .string()
     .regex(/^[a-f\d]{24}$/i, { message: "Author must be a valid ObjectId." }),
   isPublished: z.boolean().default(false),
-  createdAt: z.date().optional(), 
-  updatedAt: z.date().optional(), 
 });
 
 export const BlogValidation = {

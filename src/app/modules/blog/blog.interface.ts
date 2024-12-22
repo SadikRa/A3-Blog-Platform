@@ -5,6 +5,4 @@ export interface IBlog {
   content: string; 
   author: ObjectId;
   isPublished: boolean; 
-  createdAt: Date; 
-  updatedAt: Date;
 }
