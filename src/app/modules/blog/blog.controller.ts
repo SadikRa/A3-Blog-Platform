@@ -33,7 +33,7 @@ const createBlog = async (req: Request, res: Response) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: 'Something went wrong',
-      error: error.message || error,
+      error: error,
     });
   }
 };
@@ -74,7 +74,7 @@ const updateBlog = async (req: Request, res: Response) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: 'Something went wrong',
-      error: error.message || error,
+      error: error,
     });
   }
 };
@@ -100,7 +100,7 @@ const deleteBlog = async (req: Request, res: Response) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: 'Something went wrong',
-      error: error.message || error,
+      error: error,
     });
   }
 };
@@ -118,7 +118,7 @@ const getAllBlog = async (req: Request, res: Response) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: 'Something went wrong',
-      error: error.message || error,
+      error: error,
     });
   }
 };
