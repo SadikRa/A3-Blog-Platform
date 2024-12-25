@@ -49,19 +49,10 @@ const getAllBlogFromDB = async () => {
   return blogs;
 };
 
-// Delete a blog as an admin
-const deleteBlogAdminFromDB = async (id: string) => {
-  const deleteBlog = await Blog.findByIdAndDelete(id);
-  if (!deleteBlog) {
-    throw new Error('Blog not found');
-  }
-  return deleteBlog;
-};
 
 export const blogService = {
   createBlogIntoDB,
   updateBlogIntoDB,
   deleteBlogFromDB,
   getAllBlogFromDB,
-  deleteBlogAdminFromDB,
 };
