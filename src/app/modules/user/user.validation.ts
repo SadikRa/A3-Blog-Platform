@@ -23,16 +23,6 @@ const userValidationSchema = z.object({
     .optional()
     .default('user'),
   isBlocked: z.boolean().optional().default(false),
-  createdAt: z
-    .date({
-      invalid_type_error: 'Invalid date format',
-    })
-    .optional(),
-  updatedAt: z
-    .date({
-      invalid_type_error: 'Invalid date format',
-    })
-    .optional(),
 });
 
 export const UserValidation = {
