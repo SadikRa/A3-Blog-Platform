@@ -1,25 +1,19 @@
 import { StatusCodes } from 'http-status-codes';
-import { Request, Response } from 'express';
 import { UserServices } from './user.service';
+import sendResponse from '../../utils/sendResponse';
+import catchAsync from '../../utils/catchAsync';
 
-const createUser = async (req: Request, res: Response) => {
-  try {
-    const user = req?.body;
-    const result = await UserServices.createUserIntoDB(user);
+const createUser = catchAsync(async (req, res) => {
+  const user = req.body;
+  const result = await UserServices.createUserIntoDB(user);
 
-    res.status(StatusCodes.CREATED).json({
-      success: true,
-      message: 'User created successfully',
-      data: result,
-    });
-  } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: 'Failed to create user',
-      error: error instanceof Error ? error.message : 'Something went wrong',
-    });
-  }
-};
+  sendResponse(res, {
+    statusCode: StatusCodes.CREATED,
+    success: true,
+    message: 'User created successfully',
+    data: result,
+  });
+});
 
 export const userController = {
   createUser,
