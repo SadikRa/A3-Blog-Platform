@@ -26,6 +26,7 @@ const deleteBlogFromDB = async (id: string) => {
 // Get all blogs with optional query parameters for searching, sorting, and filtering
 
 // const getAllBlogFromDB = async (query: Record<string, unknown>) => {
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 const getAllBlogFromDB = async (query: unknown) => {
   // const { search, sortBy = 'createdAt', sortOrder = 'asc', filter } = query;
 
