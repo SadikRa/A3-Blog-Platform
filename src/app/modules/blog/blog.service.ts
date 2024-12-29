@@ -3,6 +3,8 @@ import { IBlog } from './blog.interface';
 import { Blog } from './blog.model';
 import AppError from '../../errors/AppError';
 import { User } from '../user/user.model';
+import QueryBuilder from '../../builder/QueryBuilder';
+import { blogSearchableFields, filterableFields } from './blog.constant';
 
 //create blog
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -75,30 +77,17 @@ const deleteBlogFromDB = async (userId: string, blogId: string) => {
   return { success: true };
 };
 
-// const getAllBlogFromDB = async (query: Record<string, unknown>) => {
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-const getAllBlogFromDB = async (query: unknown) => {
-  // const { search, sortBy = 'createdAt', sortOrder = 'asc', filter } = query;
+///get all blog
+const getAllBlogFromDB = async (query: Record<string, unknown>) => {
+  const blogQuery = new QueryBuilder(Blog.find().populate('author'), query)
+    .search(blogSearchableFields)
+    .sort()
+    .filter(filterableFields);
 
-  // const filterQuery: Record<string, unknown> = {};
-
-  // if (search) {
-  //   filterQuery.$or = [
-  //     { title: { $regex: search, $options: 'i' } },  // Case-insensitive search for title
-  //     { content: { $regex: search, $options: 'i' } }  // Case-insensitive search for content
-  //   ];
-  // }
-
-  // if (filter) {
-  //   filterQuery.author = filter;  // Filter by author
-  // }
-
-  // const sortQuery: Record<string, unknown> = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };  // Sort by specified field
-
-  // const blogs = await Blog.find(filterQuery).sort(sortQuery);
-  const blogs = await Blog.find();
-  return blogs;
+  const result = await blogQuery.queryResult; 
+  return result;
 };
+
 
 export const blogService = {
   createBlogIntoDB,

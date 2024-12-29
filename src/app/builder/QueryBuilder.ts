@@ -1,82 +1,53 @@
 import { FilterQuery, Query } from 'mongoose';
 
-type QueryParams = Record<string, unknown>;
-
-type SortOrder = 'asc' | 'desc';
-
-type SearchableFields<T> = (keyof T)[];
-
 class QueryBuilder<T> {
-  private modelQuery: Query<T[], T>;
-  private query: QueryParams;
+  protected modelQuery: Query<T[], T>;
+  protected query: Record<string, unknown>;
 
-  constructor(modelQuery: Query<T[], T>, query: QueryParams) {
+  constructor(modelQuery: Query<T[], T>, query: Record<string, unknown>) {
     this.modelQuery = modelQuery;
     this.query = query;
   }
 
-  
-  public search(searchableFields: SearchableFields<T>): this {
+  get queryResult() {
+    return this.modelQuery;
+  }
+
+  search(searchableFields: string[]): this {
     const search = this.query.search as string | undefined;
 
     if (search) {
-      this.modelQuery = this.modelQuery.find({
-        $or: searchableFields.map(
-          (field) =>
-            ({
-              [field]: { $regex: search, $options: 'i' },
-            }) as FilterQuery<T>,
-        ),
-      });
+      const searchConditions = searchableFields.map((field) => ({
+        [field]: { $regex: search, $options: 'i' },
+      })) as FilterQuery<T>[];
+
+      this.modelQuery = this.modelQuery.find({ $or: searchConditions });
     }
 
     return this;
   }
 
-  public filter(): this {
-    const { author } = this.query;
-
-    if (author) {
-      this.modelQuery = this.modelQuery.find({ author });
-    }
-
-    return this;
-  }
-
-  
-  public sort(): this {
+  sort(): this {
     const sortBy = (this.query.sortBy as string) || 'createdAt';
-    const sortOrder = (this.query.sortOrder as SortOrder) === 'desc' ? '-' : '';
-
+    const sortOrder = (this.query.sortOrder as string) === 'asc' ? '' : '-';
     this.modelQuery = this.modelQuery.sort(`${sortOrder}${sortBy}`);
-
     return this;
   }
 
+  filter(filterableFields: string[]): this {
+    const filters = filterableFields.reduce((acc, field) => {
+      if (this.query[field]) {
+        acc[field] = this.query[field];
+      }
+      return acc;
+    }, {} as Record<string, unknown>);
 
-  public paginate(): this {
-    const page = Number(this.query.page) || 1;
-    const limit = Number(this.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    if (this.query.filter) {
+      filters['author'] = this.query.filter;
+    }
 
-    this.modelQuery = this.modelQuery.skip(skip).limit(limit);
-
+    this.modelQuery = this.modelQuery.find(filters as FilterQuery<T>);
     return this;
-  }
-
-  
-  public fields(): this {
-    const fields =
-      (this.query.fields as string)?.split(',').join(' ') || '-__v';
-
-    this.modelQuery = this.modelQuery.select(fields);
-
-    return this;
-  }
-
- 
-  public async execute(): Promise<T[]> {
-    return this.modelQuery.exec();
   }
 }
 
