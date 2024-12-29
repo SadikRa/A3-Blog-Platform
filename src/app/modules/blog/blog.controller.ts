@@ -40,18 +40,10 @@ const updateBlog = catchAsync(async (req, res) => {
 
 //delete blog
 const deleteBlog = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const userId = req.user?._id as string;
+  const { id: blogId } = req.params; 
 
-  const deletedBlog = await blogService.deleteBlogFromDB(id);
-
-  if (!deletedBlog) {
-    return sendResponse(res, {
-      statusCode: StatusCodes.NOT_FOUND,
-      success: false,
-      message: 'Blog not found',
-      data: null,
-    });
-  }
+  await blogService.deleteBlogFromDB(userId, blogId);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
