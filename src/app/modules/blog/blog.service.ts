@@ -2,7 +2,6 @@ import { StatusCodes } from 'http-status-codes';
 import { IBlog } from './blog.interface';
 import { Blog } from './blog.model';
 import AppError from '../../errors/AppError';
-import { User } from '../user/user.model';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { blogSearchableFields, filterableFields } from './blog.constant';
 
@@ -20,26 +19,10 @@ const createBlogIntoDB = async (user: any, payload: IBlog) => {
 };
 
 //update blog
-const updateBlogIntoDB = async (
-  userID: string,
-  blogID: string,
-  data: Partial<IBlog>,
-) => {
-  const user = await User.findById(userID).select('-password');
-  if (!user) {
-    throw new AppError(StatusCodes.NOT_FOUND, 'User not found!');
-  }
-
+const updateBlogIntoDB = async (blogID: string, data: Partial<IBlog>) => {
   const blog = await Blog.findById(blogID);
   if (!blog) {
     throw new AppError(StatusCodes.NOT_FOUND, 'Blog not found!');
-  }
-
-  if (blog.author.toString() !== userID.toString()) {
-    throw new AppError(
-      StatusCodes.FORBIDDEN,
-      'You are not authorized to update this blog',
-    );
   }
 
   const updatedBlog = await Blog.findByIdAndUpdate(blogID, data, {
@@ -58,18 +41,11 @@ const updateBlogIntoDB = async (
 };
 
 // Delete a blog from the database
-const deleteBlogFromDB = async (userId: string, blogId: string) => {
+const deleteBlogFromDB = async (blogId: string) => {
   const blog = await Blog.findById(blogId).populate('author');
 
   if (!blog) {
     throw new AppError(StatusCodes.NOT_FOUND, 'Blog not found!');
-  }
-
-  if (blog.author?.toString() !== userId) {
-    throw new AppError(
-      StatusCodes.FORBIDDEN,
-      'You are not authorized to delete this blog!',
-    );
   }
 
   await Blog.findByIdAndDelete(blogId);
@@ -84,10 +60,9 @@ const getAllBlogFromDB = async (query: Record<string, unknown>) => {
     .sort()
     .filter(filterableFields);
 
-  const result = await blogQuery.queryResult; 
+  const result = await blogQuery.queryResult;
   return result;
 };
-
 
 export const blogService = {
   createBlogIntoDB,

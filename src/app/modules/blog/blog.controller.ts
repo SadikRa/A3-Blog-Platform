@@ -2,7 +2,6 @@ import { StatusCodes } from 'http-status-codes';
 import { blogService } from './blog.service';
 import sendResponse from '../../utils/sendResponse';
 import catchAsync from '../../utils/catchAsync';
-import AppError from '../../errors/AppError';
 
 //create blog
 const createBlog = catchAsync(async (req, res) => {
@@ -22,14 +21,9 @@ const createBlog = catchAsync(async (req, res) => {
 //update blog
 const updateBlog = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const userId = req.user?._id;
   const payload = req.body;
 
-  if (!userId) {
-    throw new AppError(StatusCodes.UNAUTHORIZED, 'Unauthorized!');
-  }
-
-  const updatedBlog = await blogService.updateBlogIntoDB(userId, id, payload);
+  const updatedBlog = await blogService.updateBlogIntoDB(id, payload);
 
   res.status(StatusCodes.OK).json({
     success: true,
@@ -40,10 +34,9 @@ const updateBlog = catchAsync(async (req, res) => {
 
 //delete blog
 const deleteBlog = catchAsync(async (req, res) => {
-  const userId = req.user?._id as string;
-  const { id: blogId } = req.params; 
+  const { id: blogId } = req.params;
 
-  await blogService.deleteBlogFromDB(userId, blogId);
+  await blogService.deleteBlogFromDB(blogId);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -56,14 +49,13 @@ const deleteBlog = catchAsync(async (req, res) => {
 //get all data blog
 const getAllBlogs = catchAsync(async (req, res) => {
   const result = await blogService.getAllBlogFromDB(req.query);
-  
+
   res.status(200).json({
     success: true,
     message: 'Blogs fetched successfully',
     data: result,
   });
 });
-
 
 export const blogController = {
   createBlog,
