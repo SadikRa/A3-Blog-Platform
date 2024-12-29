@@ -2,14 +2,11 @@ import { StatusCodes } from 'http-status-codes';
 import { blogService } from './blog.service';
 import sendResponse from '../../utils/sendResponse';
 import catchAsync from '../../utils/catchAsync';
-// import AppError from '../../errors/AppError';
-// import jwt, { JwtPayload } from 'jsonwebtoken';
-// import config from '../../config';
-// import { User } from '../user/user.model';
+import AppError from '../../errors/AppError';
 
-
+//create blog
 const createBlog = catchAsync(async (req, res) => {
-  const user = req.user; // Extract user data from `authorize` middleware
+  const user = req.user;
   const payload = req.body;
 
   const result = await blogService.createBlogIntoDB(user, payload);
@@ -22,39 +19,26 @@ const createBlog = catchAsync(async (req, res) => {
   });
 });
 
+//update blog
 const updateBlog = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const { title, content, isPublished } = req.body;
+  const userId = req.user?._id;
+  const payload = req.body;
 
-  if (!title && !content && isPublished === undefined) {
-    return sendResponse(res, {
-      statusCode: StatusCodes.BAD_REQUEST,
-      success: false,
-      message: 'At least one of title, content, or isPublished must be provided',
-      data: null,
-    });
+  if (!userId) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, 'Unauthorized!');
   }
 
-  const updateData = { title, content, isPublished };
-  const updatedBlog = await blogService.updateBlogIntoDB(id, updateData);
+  const updatedBlog = await blogService.updateBlogIntoDB(userId, id, payload);
 
-  if (!updatedBlog) {
-    return sendResponse(res, {
-      statusCode: StatusCodes.NOT_FOUND,
-      success: false,
-      message: 'Blog not found',
-      data: null,
-    });
-  }
-
-  sendResponse(res, {
-    statusCode: StatusCodes.OK,
+  res.status(StatusCodes.OK).json({
     success: true,
     message: 'Blog updated successfully',
     data: updatedBlog,
   });
 });
 
+//delete blog
 const deleteBlog = catchAsync(async (req, res) => {
   const { id } = req.params;
 

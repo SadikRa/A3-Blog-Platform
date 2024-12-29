@@ -2,25 +2,58 @@ import { StatusCodes } from 'http-status-codes';
 import { IBlog } from './blog.interface';
 import { Blog } from './blog.model';
 import AppError from '../../errors/AppError';
+import { User } from '../user/user.model';
 
+//create blog
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createBlogIntoDB = async (user: any, payload: IBlog) => {
   if (user.role !== 'user') {
     throw new AppError(StatusCodes.FORBIDDEN, 'Only users can create blogs');
   }
 
-  payload.author = user.userId; // Attach userId to the author field
+  payload.author = user.userId;
   const result = await Blog.create(payload);
 
-  return result.populate('author'); // Populate the author details
+  return result.populate('author');
 };
 
-const updateBlogIntoDB = async (id: string, payload: Partial<IBlog>) => {
-  const updateBlogInfo = await Blog.findByIdAndUpdate(id, payload, {
-    new: true,
-  }); // 'new: true' returns the updated document
+//update blog
+const updateBlogIntoDB = async (
+  userID: string,
+  blogID: string,
+  data: Partial<IBlog>,
+) => {
 
-  return updateBlogInfo;
+  const user = await User.findById(userID).select('-password');
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'User not found!');
+  }
+
+  const blog = await Blog.findById(blogID);
+  if (!blog) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'Blog not found!');
+  }
+
+  if (blog.author.toString() !== userID.toString()) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      'You are not authorized to update this blog',
+    );
+  }
+
+  const updatedBlog = await Blog.findByIdAndUpdate(blogID, data, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!updatedBlog) {
+    throw new AppError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      'Failed to update the blog',
+    );
+  }
+
+  return updatedBlog;
 };
 
 // Delete a blog from the database
@@ -29,8 +62,6 @@ const deleteBlogFromDB = async (id: string) => {
 
   return result;
 };
-
-// Get all blogs with optional query parameters for searching, sorting, and filtering
 
 // const getAllBlogFromDB = async (query: Record<string, unknown>) => {
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars

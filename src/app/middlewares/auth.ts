@@ -9,7 +9,7 @@ import catchAsync from '../utils/catchAsync';
 
 const authorize = (...allowedRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization?.split(' ')[1]; // Extract Bearer token
+    const token = req.headers.authorization?.split(' ')[1]; 
 
     if (!token) {
       throw new AppError(StatusCodes.UNAUTHORIZED, 'Access denied. Token is missing.');
@@ -32,8 +32,7 @@ const authorize = (...allowedRoles: TUserRole[]) => {
       throw new AppError(StatusCodes.FORBIDDEN, 'You do not have permission to perform this action.');
     }
 
-    // Attach user information to the request
-    req.user = { userId, role }; // Attach essential user data
+    req.user = { userId, role };
     next();
   });
 };

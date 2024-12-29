@@ -7,12 +7,20 @@ import authorize from '../../middlewares/auth';
 
 const router = express.Router();
 
-//order a book
+//post blog 
 router.post(
   '/blogs',
-  authorize(USER_ROLE.user), // Ensure only users can create blogs
-  validateRequest(BlogValidation.blogValidationSchema), // Validate the request body
+  authorize(USER_ROLE.user), 
+  validateRequest(BlogValidation.blogValidationSchema),
   blogController.createBlog,
+);
+
+//update blog
+router.patch(
+  '/blogs/:id',
+  authorize(USER_ROLE.user),
+  validateRequest(BlogValidation.updateBlogValidationSchema),
+  blogController.updateBlog,
 );
 
 
