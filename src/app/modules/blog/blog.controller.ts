@@ -2,22 +2,17 @@ import { StatusCodes } from 'http-status-codes';
 import { blogService } from './blog.service';
 import sendResponse from '../../utils/sendResponse';
 import catchAsync from '../../utils/catchAsync';
+// import AppError from '../../errors/AppError';
+// import jwt, { JwtPayload } from 'jsonwebtoken';
+// import config from '../../config';
+// import { User } from '../user/user.model';
+
 
 const createBlog = catchAsync(async (req, res) => {
-  const { title, content, author } = req.body;
+  const user = req.user; // Extract user data from `authorize` middleware
+  const payload = req.body;
 
-  // Basic validation
-  if (!title || !content || !author) {
-    return sendResponse(res, {
-      statusCode: StatusCodes.BAD_REQUEST,
-      success: false,
-      message: 'Title, content, and author are required',
-      data: null,
-    });
-  }
-
-  const blogData = { title, content, author, isPublished: true };
-  const result = await blogService.createBlogIntoDB(blogData);
+  const result = await blogService.createBlogIntoDB(user, payload);
 
   sendResponse(res, {
     statusCode: StatusCodes.CREATED,

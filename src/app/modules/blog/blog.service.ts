@@ -1,13 +1,20 @@
+import { StatusCodes } from 'http-status-codes';
 import { IBlog } from './blog.interface';
 import { Blog } from './blog.model';
+import AppError from '../../errors/AppError';
 
-// Create a new blog in the database
-const createBlogIntoDB = async (payload: IBlog) => {
-  const result = await Blog.create(payload); // Add 'await' for async operation
-  return result;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createBlogIntoDB = async (user: any, payload: IBlog) => {
+  if (user.role !== 'user') {
+    throw new AppError(StatusCodes.FORBIDDEN, 'Only users can create blogs');
+  }
+
+  payload.author = user.userId; // Attach userId to the author field
+  const result = await Blog.create(payload);
+
+  return result.populate('author'); // Populate the author details
 };
 
-// Update an existing blog in the database
 const updateBlogIntoDB = async (id: string, payload: Partial<IBlog>) => {
   const updateBlogInfo = await Blog.findByIdAndUpdate(id, payload, {
     new: true,
@@ -49,7 +56,6 @@ const getAllBlogFromDB = async (query: unknown) => {
   const blogs = await Blog.find();
   return blogs;
 };
-
 
 export const blogService = {
   createBlogIntoDB,

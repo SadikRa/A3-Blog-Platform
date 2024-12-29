@@ -10,11 +10,10 @@ const router = express.Router();
 //order a book
 router.post(
   '/blogs',
-  authorize(USER_ROLE.user), 
-  validateRequest(BlogValidation.blogValidationSchema),
+  authorize(USER_ROLE.user), // Ensure only users can create blogs
+  validateRequest(BlogValidation.blogValidationSchema), // Validate the request body
   blogController.createBlog,
 );
-
 
 
 export const blogRoutes = router;

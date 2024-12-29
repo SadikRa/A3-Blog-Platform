@@ -9,46 +9,31 @@ import catchAsync from '../utils/catchAsync';
 
 const authorize = (...allowedRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization;
+    const token = req.headers.authorization?.split(' ')[1]; // Extract Bearer token
 
     if (!token) {
-      throw new AppError(
-        StatusCodes.UNAUTHORIZED,
-        'Access denied. Token is missing.',
-      );
+      throw new AppError(StatusCodes.UNAUTHORIZED, 'Access denied. Token is missing.');
     }
 
-    const decoded = jwt.verify(
-      token,
-      config.jwt_access_secret as string,
-    ) as JwtPayload;
+    const decoded = jwt.verify(token, config.jwt_access_secret as string) as JwtPayload;
 
-    const { role, userId } = decoded;
+    const { userId, role } = decoded;
 
     const user = await User.findById(userId);
     if (!user) {
-      throw new AppError(
-        StatusCodes.NOT_FOUND,
-        'User not found in the system.',
-      );
+      throw new AppError(StatusCodes.NOT_FOUND, 'User not found in the system.');
     }
 
-    if (user?.isBlocked) {
-      throw new AppError(
-        StatusCodes.FORBIDDEN,
-        'Your account has been blocked.',
-      );
+    if (user.isBlocked) {
+      throw new AppError(StatusCodes.FORBIDDEN, 'Your account has been blocked.');
     }
 
     if (allowedRoles.length && !allowedRoles.includes(role as TUserRole)) {
-      throw new AppError(
-        StatusCodes.FORBIDDEN,
-        'You do not have permission to perform this action.',
-      );
+      throw new AppError(StatusCodes.FORBIDDEN, 'You do not have permission to perform this action.');
     }
 
     // Attach user information to the request
-    // req.user = decoded as JwtPayload;
+    req.user = { userId, role }; // Attach essential user data
     next();
   });
 };
