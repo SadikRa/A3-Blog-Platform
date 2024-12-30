@@ -4,6 +4,8 @@ import { blogRoutes } from './app/modules/blog/blog.router';
 import { userRoutes } from './app/modules/user/user.router';
 import { authRoutes } from './app/modules/auth/auth.route';
 import { adminRoutes } from './app/modules/admin/admin.route';
+import globalErrorHandler from './app/middlewares/globalErrorhandler';
+import notFound from './app/middlewares/notFound';
 
 const app: Application = express();
 
@@ -23,9 +25,9 @@ const test = (req: Request, res: Response) => {
 
 app.get('/', test);
 
-// app.use(globalErrorHandler);
+app.use(globalErrorHandler);
 
 //Not Found
-// app.use(notFound);
+app.use(notFound);
 
 export default app;

@@ -39,7 +39,7 @@ A-3 Blog Platform is a full-featured blogging application built with TypeScript,
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/A-3-BLOG-PLATFORM.git
+   git clone https://github.com/SadikRa/A3-Blog-Platform.git
    cd A-3-BLOG-PLATFORM
    ```
 
@@ -109,3 +109,6 @@ A-3-BLOG-PLATFORM/
 ```
 
 ---
+
+
+- my vercel vercel deploy server link: https://a-3-blog-platform-copy.vercel.app
